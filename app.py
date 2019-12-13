@@ -103,7 +103,7 @@ def updateTask():
         <h2>Wrong syntax. "id" must be numeric. "title" and "description" must be text. "done" must be true or false.</h2>
         """
 #user post only one field numeric id in jason dictionary format if id match user delete his task        
-@app.route('/deleteTask', methods=['GET', 'POST'])
+@app.route('/deleteTask', methods=['POST'])
 def deleteTask():
     task = dict(request.json)
     if task["id"] == int(task["id"]):
