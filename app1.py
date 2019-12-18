@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, jsonify
+from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 
 app = Flask(__name__)
@@ -71,49 +71,42 @@ def getSingleTask(id):
 #user post 4 fields (id,title,description,done) in jason dictionary format to create a new task
 @app.route('/createTask', methods=['POST'])
 def createTask():
-    task = dict(request.json)
-    if task["id"] == int(task["id"]) and task["title"] == str(task["title"]) and task["description"] == str(task["description"]) and task["done"] == bool(task["done"]):
-        myTask = mongo.db.myTask
-        match = myTask.find_one({"id":task["id"]})
-        if match:
-            return """
-            <h2>"id" is already in use. "id" must be unique.</h2>
-            """
-        else:
-            myTask.insert_one(task)
+    task = request.json
+    myTask = mongo.db.myTask
+    if task != None:
+        if 'id' in task:
+            match = myTask.find_one({'id':int(task['id'])})
+            if match:
+                return """
+                <h2>"id" is already in use. "id" must be unique.</h2>
+                """
+            myTask.insert({'id':task['id'],'title':task['title'],'description':task['description'],'done':bool(task['done'])})
             return """
             <h2>Succesfully create a Task.</h2>
             """
-    else:
-        return """
-        <h2>Wrong syntax. "id" must be numeric. "title" and "description" must be text. "done" must be true or false.</h2>
-        """
-
+    return """
+    <h2> Wrong Text.</h2>
+    """
 
 #user post 4 fields (id,title,description,done) in jason dictionary format if id numeric and match user update other task fields 
 @app.route('/updateTask', methods=['PUT'])
 def updateTask():
-    task = dict(request.json)
-    task = dict(request.json)
-    if task["id"] == int(task["id"]) and task["title"] == str(task["title"]) and task["description"] == str(task["description"]) and task["done"] == bool(task["done"]):
-        myTask = mongo.db.myTask
-        match = myTask.find_one({"id":task["id"]})
-        if match:
-            myTask.delete_one({"id":task["id"]})
-            myTask.insert_one(task)
+    task = request.json
+    myTask = mongo.db.myTask
+    if task != None:
+        if 'id' in task:
+            match = myTask.find_one({'id':int(task['id'])})
+            if match:
+                myTask.delete_one({'id':int(id)})
+            myTask.insert({'id':task['id'],'title':task['title'],'description':task['description'],'done':bool(task['done'])})
             return """
-            <h2>Succesfully update a Task.</h2>
+            <h2>Succesfully create a Task.</h2>
             """
-        else:
-            return """
-            <h2>Wrong "id".</h2>
-            """
-    else:
-        return """
-        <h2>Wrong syntax. "id" must be numeric. "title" and "description" must be text. "done" must be true or false.</h2>
-        """
-
-
+    return """
+    <h2> Wrong Text.</h2>
+    """
+        
+    
 #user write numeric id with url if id match user delete his task        
 @app.route('/deleteTask/<id>', methods=['DELETE'])
 def deleteTask(id):

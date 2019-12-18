@@ -24,7 +24,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(result.status_code,200)
 
     def test_updateTask(self):
-        result = self.app.get('/updateTask')
+        result = self.app.put('/updateTask')
         self.assertEqual(result.status_code,200)
 
     def test_deleteTask(self):
