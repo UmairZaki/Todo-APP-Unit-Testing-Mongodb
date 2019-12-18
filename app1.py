@@ -33,6 +33,8 @@ task_list = [
         "done": False
     }
 ]
+
+
 #list of tasks posted to mongodb database
 @app.route('/tasks',methods=['POST'])
 def tasks():
@@ -41,25 +43,31 @@ def tasks():
     return """
     <h2>List of Tasks upload succesfully</h2>
     """
-#user post only one field numeric id in jason dictionary format if id match user get his task
-@app.route('/getTask', methods=['GET','POST'])
+
+
+#get all tasks from mongodb database (Retrieve list of tasks)
+@app.route('/getTask', methods=['GET'])
 def getTask():
-    task = dict(request.json)
-    if task["id"] == int(task["id"]):
         myTask = mongo.db.myTask
-        match = myTask.find_one({"id":task["id"]})
+        match = myTask.find({},{'_id':0})
+        task = []
+        for i in match:
+            task.append(i)
+        return jsonify(task)
+
+
+#user write numeric id with url if id match user get a single task from mongodb database (Retrieve a task)
+@app.route('/getSingleTask/<id>', methods=['GET'])
+def getSingleTask(id):
+        myTask = mongo.db.myTask
+        match = myTask.find_one({'id':int(id)},{'_id':0})
         if match:
-            task = []
-            task.append({'description': match['description'], 'title' : match['title'],'id': match['id'], 'done' : match['done']})
-            return jsonify({"Succesfully get a Task" : task})
-        else:
-            return """
-            <h2>Wrong "id"</h2>
-            """
-    else:
+            return jsonify(match)
         return """
-        <h2>Wrong "id". "id" must be numeric.</h2>
+        <h2> ID not Found.</h2>
         """
+        
+
 #user post 4 fields (id,title,description,done) in jason dictionary format to create a new task
 @app.route('/createTask', methods=['POST'])
 def createTask():
@@ -80,6 +88,8 @@ def createTask():
         return """
         <h2>Wrong syntax. "id" must be numeric. "title" and "description" must be text. "done" must be true or false.</h2>
         """
+
+
 #user post 4 fields (id,title,description,done) in jason dictionary format if id numeric and match user update other task fields 
 @app.route('/updateTask', methods=['PUT'])
 def updateTask():
@@ -102,25 +112,22 @@ def updateTask():
         return """
         <h2>Wrong syntax. "id" must be numeric. "title" and "description" must be text. "done" must be true or false.</h2>
         """
-#user post only one field numeric id in jason dictionary format if id match user delete his task        
-@app.route('/deleteTask', methods=['POST'])
-def deleteTask():
-    task = dict(request.json)
-    if task["id"] == int(task["id"]):
-        myTask = mongo.db.myTask
-        match = myTask.find_one({"id":task["id"]})
-        if match:
-            myTask.delete_one({"id":task["id"]})
-            return """
-            <h2>Task succesfully deleted.</h2>
-            """
-        else:
-            return """
-            <h2>Wrong "id".</h2>
-            """
-    else:
+
+
+#user write numeric id with url if id match user delete his task        
+@app.route('/deleteTask/<id>', methods=['DELETE'])
+def deleteTask(id):
+    myTask = mongo.db.myTask
+    match = myTask.find_one({'id':int(id)})
+    if match:
+        myTask.delete_one({'id':int(id)})
+        
+        return """
+        <h2>Task succesfully deleted.</h2>
         """
-        <h2>Wrong syntax. "id" must be numeric.</h2>
-        """
+    return """
+    <h2>Wrong "id".</h2>
+    """
+    
 
 app.run(debug=True)
